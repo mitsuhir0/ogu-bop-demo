@@ -4,6 +4,8 @@ import io
 import base64
 import datetime
 import matplotlib.pyplot as plt
+import numpy as np
+import matplotlib_fontja
 
 st.set_page_config(page_title="国際収支・複式簿記デモ", layout="wide")
 st.title("\U0001F4B0 国際収支・複式簿記体験アプリ")
@@ -136,25 +138,26 @@ with tab1:
             # 取引日付を追加
             current_datetime = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
             
+            # 数値型のフィールドにはfloatを使用し、空のフィールドにはnp.nanを使用
             record = {
                 "日時": current_datetime,
                 "取引": transaction,
-                "金額": amount,
+                "金額": float(amount),
                 "メモ": memo,
                 "経常収支区分": first_account.get("category", "") if first_account["type"] == "経常収支" else (
                               second_account.get("category", "") if second_account["type"] == "経常収支" else ""),
-                "経常収支（借方）": amount if first_account["type"] == "経常収支" and first_account["position"] == "借方" else (
-                                 amount if second_account["type"] == "経常収支" and second_account["position"] == "借方" else ""),
-                "経常収支（貸方）": amount if first_account["type"] == "経常収支" and first_account["position"] == "貸方" else (
-                                 amount if second_account["type"] == "経常収支" and second_account["position"] == "貸方" else ""),
+                "経常収支（借方）": float(amount) if first_account["type"] == "経常収支" and first_account["position"] == "借方" else (
+                                float(amount) if second_account["type"] == "経常収支" and second_account["position"] == "借方" else np.nan),
+                "経常収支（貸方）": float(amount) if first_account["type"] == "経常収支" and first_account["position"] == "貸方" else (
+                                float(amount) if second_account["type"] == "経常収支" and second_account["position"] == "貸方" else np.nan),
                 "金融収支区分_借方": first_account.get("category", "") if first_account["type"] == "金融収支" and first_account["position"] == "借方" else (
                                   second_account.get("category", "") if second_account["type"] == "金融収支" and second_account["position"] == "借方" else ""),
                 "金融収支区分_貸方": first_account.get("category", "") if first_account["type"] == "金融収支" and first_account["position"] == "貸方" else (
                                   second_account.get("category", "") if second_account["type"] == "金融収支" and second_account["position"] == "貸方" else ""),
-                "金融収支（借方）": amount if first_account["type"] == "金融収支" and first_account["position"] == "借方" else (
-                                 amount if second_account["type"] == "金融収支" and second_account["position"] == "借方" else ""),
-                "金融収支（貸方）": amount if first_account["type"] == "金融収支" and first_account["position"] == "貸方" else (
-                                 amount if second_account["type"] == "金融収支" and second_account["position"] == "貸方" else ""),
+                "金融収支（借方）": float(amount) if first_account["type"] == "金融収支" and first_account["position"] == "借方" else (
+                                float(amount) if second_account["type"] == "金融収支" and second_account["position"] == "借方" else np.nan),
+                "金融収支（貸方）": float(amount) if first_account["type"] == "金融収支" and first_account["position"] == "貸方" else (
+                                float(amount) if second_account["type"] == "金融収支" and second_account["position"] == "貸方" else np.nan),
                 "詳細（借方）": first_account.get("detail", "") if first_account["position"] == "借方" else second_account.get("detail", ""),
                 "詳細（貸方）": first_account.get("detail", "") if first_account["position"] == "貸方" else second_account.get("detail", "")
             }
@@ -198,12 +201,12 @@ with tab1:
             "金額": df["金額"].sum(),
             "メモ": "",
             "経常収支区分": "",
-            "経常収支（借方）": df["経常収支（借方）"].replace("", 0).astype(float).sum(),
-            "経常収支（貸方）": df["経常収支（貸方）"].replace("", 0).astype(float).sum(),
+            "経常収支（借方）": df["経常収支（借方）"].sum(),
+            "経常収支（貸方）": df["経常収支（貸方）"].sum(),
             "金融収支区分_借方": "",
             "金融収支区分_貸方": "",
-            "金融収支（借方）": df["金融収支（借方）"].replace("", 0).astype(float).sum(),
-            "金融収支（貸方）": df["金融収支（貸方）"].replace("", 0).astype(float).sum(),
+            "金融収支（借方）": df["金融収支（借方）"].sum(),
+            "金融収支（貸方）": df["金融収支（貸方）"].sum(),
             "詳細（借方）": "",
             "詳細（貸方）": ""
         }
@@ -237,13 +240,13 @@ with tab2:
         df = pd.DataFrame(st.session_state.records)
         
         # 経常収支の詳細分析
-        ca_credits = df["経常収支（貸方）"].replace("", 0).astype(float)
-        ca_debits = df["経常収支（借方）"].replace("", 0).astype(float)
+        ca_credits = df["経常収支（貸方）"].fillna(0)
+        ca_debits = df["経常収支（借方）"].fillna(0)
         ca_balance = ca_credits.sum() - ca_debits.sum()
         
         # 金融収支の詳細分析
-        fa_credits = df["金融収支（貸方）"].replace("", 0).astype(float)
-        fa_debits = df["金融収支（借方）"].replace("", 0).astype(float)
+        fa_credits = df["金融収支（貸方）"].fillna(0)
+        fa_debits = df["金融収支（借方）"].fillna(0)
         fa_balance = fa_credits.sum() - fa_debits.sum()
         
         # 誤差脱漏計算
@@ -269,8 +272,8 @@ with tab2:
             ca_data = {}
             
             for category in ca_categories:
-                category_credits = df[df["経常収支区分"] == category]["経常収支（貸方）"].replace("", 0).astype(float).sum()
-                category_debits = df[df["経常収支区分"] == category]["経常収支（借方）"].replace("", 0).astype(float).sum()
+                category_credits = df[df["経常収支区分"] == category]["経常収支（貸方）"].fillna(0).sum()
+                category_debits = df[df["経常収支区分"] == category]["経常収支（借方）"].fillna(0).sum()
                 ca_data[category] = category_credits - category_debits
             
             ca_df = pd.DataFrame(list(ca_data.items()), columns=["区分", "金額"])
@@ -285,8 +288,8 @@ with tab2:
             # 経常収支カテゴリ別の円グラフデータ準備
             ca_categories_data = {}
             for category in ca_categories:
-                category_credits = df[df["経常収支区分"] == category]["経常収支（貸方）"].replace("", 0).astype(float).sum()
-                category_debits = df[df["経常収支区分"] == category]["経常収支（借方）"].replace("", 0).astype(float).sum()
+                category_credits = df[df["経常収支区分"] == category]["経常収支（貸方）"].fillna(0).sum()
+                category_debits = df[df["経常収支区分"] == category]["経常収支（借方）"].fillna(0).sum()
                 ca_categories_data[category] = abs(category_credits - category_debits)  # 絶対値を使用
             
             # 円グラフ
@@ -306,8 +309,8 @@ with tab2:
                 df = df.sort_values('日時')
                 
                 # 経常収支と金融収支の累積推移
-                df['経常収支_純額'] = df["経常収支（貸方）"].replace("", 0).astype(float) - df["経常収支（借方）"].replace("", 0).astype(float)
-                df['金融収支_純額'] = df["金融収支（貸方）"].replace("", 0).astype(float) - df["金融収支（借方）"].replace("", 0).astype(float)
+                df['経常収支_純額'] = df["経常収支（貸方）"].fillna(0) - df["経常収支（借方）"].fillna(0)
+                df['金融収支_純額'] = df["金融収支（貸方）"].fillna(0) - df["金融収支（借方）"].fillna(0)
                 
                 # 累積データ
                 df['経常収支_累積'] = df['経常収支_純額'].cumsum()
@@ -332,10 +335,10 @@ with tab2:
         # 取引タイプ別の集計
         transaction_summary = df.groupby('取引').agg({
             '金額': 'sum',
-            '経常収支（借方）': lambda x: x.replace("", 0).astype(float).sum(),
-            '経常収支（貸方）': lambda x: x.replace("", 0).astype(float).sum(),
-            '金融収支（借方）': lambda x: x.replace("", 0).astype(float).sum(),
-            '金融収支（貸方）': lambda x: x.replace("", 0).astype(float).sum()
+            '経常収支（借方）': lambda x: x.fillna(0).sum(),
+            '経常収支（貸方）': lambda x: x.fillna(0).sum(),
+            '金融収支（借方）': lambda x: x.fillna(0).sum(),
+            '金融収支（貸方）': lambda x: x.fillna(0).sum()
         }).reset_index()
         
         transaction_summary['取引回数'] = df.groupby('取引').size().values
@@ -389,6 +392,7 @@ with footer_col2:
     """)
 
 # バージョン情報
-st.caption(f"Version 0.1.0 | Last Updated: {datetime.datetime.now().strftime('%Y-%m-%d')}")
+st.caption(f"Version 0.1.1 | Last Updated: {datetime.datetime.now().strftime('%Y-%m-%d')}")
+
 
 
