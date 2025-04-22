@@ -2,7 +2,8 @@ import streamlit as st
 import pandas as pd
 import io
 import base64
-import matplotlib_fontja
+import datetime
+import matplotlib.pyplot as plt
 
 st.set_page_config(page_title="国際収支・複式簿記デモ", layout="wide")
 st.title("\U0001F4B0 国際収支・複式簿記体験アプリ")
@@ -10,6 +11,23 @@ st.markdown("""
 このアプリでは、取引を入力すると国際収支の複式簿記がどのように記録されるかを体験できます。
 国際収支は「経常収支」と「金融収支」に大きく分けられ、複式簿記の原則により借方と貸方が常に一致します。
 """)
+
+# 注意事項の展開可能セクション
+with st.expander("⚠️ 免責事項・注意事項"):
+    st.markdown("""
+    ### 免責事項
+    
+    このアプリケーションは教育目的で作成されたデモツールです。AIによって生成されたコードを使用しているため、
+    計算の正確性や会計原則への厳密な準拠性を保証するものではありません。
+    
+    実際の国際収支統計や会計処理を行う場合は、専門家の指導や公式な統計・会計基準を参照してください。
+    
+    ### 注意事項
+    
+    * このアプリは学習・理解を目的としています
+    * 実際の経済分析や意思決定には使用しないでください
+    * アプリ内のデータはセッション中のみ保存されます
+    """)
 
 # ヘルプ情報の展開可能セクション
 with st.expander("国際収支の基本知識"):
@@ -116,7 +134,6 @@ with tab1:
             second_account = transaction_info["second_account"]
             
             # 取引日付を追加
-            import datetime
             current_datetime = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
             
             record = {
@@ -194,10 +211,16 @@ with tab1:
         st.dataframe(display_df, use_container_width=True)
         
         # CSVエクスポート機能
-        csv = df.to_csv(index=False).encode('utf-8-sig')
-        b64 = base64.b64encode(csv).decode()
-        href = f'<a href="data:file/csv;base64,{b64}" download="国際収支記録.csv">取引データをCSVダウンロード</a>'
-        st.markdown(href, unsafe_allow_html=True)
+        def get_csv_download_link(df):
+            """データフレームをCSVに変換してダウンロードリンクを生成する"""
+            # BOMを追加してUTF-8でエンコードすることで、Excel等での文字化けを防止
+            csv = df.to_csv(index=False).encode('utf-8-sig')
+            b64 = base64.b64encode(csv).decode()
+            filename = "国際収支記録.csv"
+            href = f'<a href="data:text/csv;charset=utf-8-sig;base64,{b64}" download="{filename}">取引データをCSVダウンロード</a>'
+            return href
+        
+        st.markdown(get_csv_download_link(df), unsafe_allow_html=True)
         
         if st.button("全ての取引を削除"):
             st.session_state.records = []
@@ -267,8 +290,6 @@ with tab2:
                 ca_categories_data[category] = abs(category_credits - category_debits)  # 絶対値を使用
             
             # 円グラフ
-            import matplotlib.pyplot as plt
-            
             if sum(ca_categories_data.values()) > 0:  # データがある場合のみ
                 fig, ax = plt.subplots(figsize=(8, 5))
                 ax.pie(ca_categories_data.values(), labels=ca_categories_data.keys(), autopct='%1.1f%%')
@@ -347,5 +368,27 @@ with tab2:
         経常収支と金融収支は原則として互いに相殺関係にあります。例えば、経常収支が黒字の場合、その余剰資金は金融収支を通じて
         海外に投資されるか、外貨準備として蓄積されます。
         """)
+
+# フッターに著作権表記
+st.markdown("---")
+footer_col1, footer_col2 = st.columns([1, 2])
+
+with footer_col1:
+    st.markdown("""
+    ### 著作権表記
+    © 2025 Mitsuhiro Okano. All rights reserved.
+    """)
+
+with footer_col2:
+    st.markdown("""
+    ### 注釈
+    このアプリケーションは人工知能（AI）により生成されたコードを使用しています。
+    教育目的のデモンストレーションとして提供されており、内容の正確性、完全性、適時性、
+    または特定目的への適合性を保証するものではありません。
+    実際の経済分析や会計処理には、専門家の助言を求めてください。
+    """)
+
+# バージョン情報
+st.caption(f"Version 0.1.0 | Last Updated: {datetime.datetime.now().strftime('%Y-%m-%d')}")
 
 
