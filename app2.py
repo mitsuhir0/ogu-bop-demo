@@ -1,6 +1,51 @@
-import streamlit as st
+"""
+This Streamlit application provides a calculator for various types of elasticity 
+and the Marshall-Lerner condition. Users can select the type of calculation 
+they want to perform and input the required parameters to compute the results.
 
-st.title("弾力性計算機（価格・交差・所得・マーシャル・ラーナー条件）")
+Features:
+1. **Price Elasticity of Demand**:
+    - Formula: E_d = |(ΔQ / Q1) / (ΔP / P1)|
+    - Calculates the responsiveness of quantity demanded to price changes.
+    - Provides intermediate calculations and interpretation of results 
+      (elastic, unit elastic, inelastic).
+
+2. **Cross-Price Elasticity of Demand**:
+    - Formula: E_c = (ΔQ / Q1) / (ΔP' / P1')
+    - Measures the responsiveness of the quantity demanded of one good to 
+      the price change of another good.
+    - Indicates whether goods are substitutes (positive value) or complements 
+      (negative value).
+
+3. **Income Elasticity of Demand**:
+    - Formula: E_y = (ΔQ / Q1) / (ΔY / Y1)
+    - Evaluates how the quantity demanded changes with income changes.
+    - Identifies goods as normal (positive value) or inferior (negative value).
+
+4. **Marshall-Lerner Condition**:
+    - Formula: E_x + E_m > 1
+    - Assesses whether a currency depreciation will improve the current account balance.
+    - Requires user input for export and import elasticities to determine if the 
+      condition is satisfied.
+
+Inputs:
+- Quantities (Q1, Q2)
+- Prices (P1, P2, P1', P2')
+- Income levels (Y1, Y2)
+- Export and import elasticities (Ex, Em)
+
+Outputs:
+- Intermediate calculations for better understanding.
+- Final elasticity values with interpretations.
+- Error handling for invalid inputs (e.g., zero values or no change in variables).
+
+Usage:
+- Select the type of elasticity or condition to calculate.
+- Input the required parameters.
+- View the results, intermediate steps, and explanations.
+"""
+import streamlit as st
+st.title("弾力性計算機")
 
 
 # 計算する項目を選択
@@ -117,16 +162,15 @@ elif elasticity_type == "所得弾力性":
 
 elif elasticity_type == "マーシャル・ラーナー条件":
     st.subheader("マーシャル・ラーナー条件")
-    st.latex(r"|E_x| + |E_m| > 1")
+    st.latex(r"E_x + E_m > 1")
     st.markdown("""
     **マーシャル・ラーナー条件の説明**:
-    - $E_x$（為替レート変化に対する輸出量の弾力性）と $E_m$（為替レート変化に対する輸入量の弾力性）は通常正の値を取ります。
     - この条件が満たされる場合、為替レートの変化（例えば、自国通貨の減価）が経常収支を改善する可能性があります。
     """)
 
     # ユーザー入力
-    ex = st.number_input("為替レート変化に対する輸出量の弾力性（Ex, 通常正の値）", value=1.2)
-    em = st.number_input("為替レート変化に対する輸入量の弾力性（Em, 通常正の値）", value=0.8)
+    ex = st.number_input("為替レート変化に対する輸出量の弾力性（Ex）", value=1.2)
+    em = st.number_input("為替レート変化に対する輸入量の弾力性（Em）", value=0.8)
 
     # 弾力性の合計を計算
     total_elasticity = ex + em
@@ -141,9 +185,7 @@ elif elasticity_type == "マーシャル・ラーナー条件":
     # 解説
     st.markdown("""
     **解説**:
-    - **為替レート変化に対する輸出量の弾力性（Ex）**: 為替レートが変化した際に輸出量がどれだけ変化するかを示します。通常、正の値を取ります。
-    - **為替レート変化に対する輸入量の弾力性（Em）**: 為替レートが変化した際に輸入量がどれだけ変化するかを示します。通常、正の値を取ります。
+    - **為替レート変化に対する輸出量の弾力性（Ex）**: 為替レートが減価した際に輸出量がどれだけ増加するかを示します。
+    - **為替レート変化に対する輸入量の弾力性（Em）**: 為替レートが減価した際に輸入量がどれだけ減少するかを示します。
     - **条件の意味**: 自国通貨が減価した場合、輸出が増加し、輸入が減少することで経常収支が改善する可能性があります。ただし、これが成立するためには、Ex + Em > 1 である必要があります。
     """)
-
-
