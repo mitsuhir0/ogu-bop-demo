@@ -45,7 +45,11 @@ Usage:
 - View the results, intermediate steps, and explanations.
 """
 import streamlit as st
+st.set_page_config(page_title="弾力性計算機", layout="wide")
 st.title("弾力性計算機")
+st.markdown("""
+このページでは、価格弾力性やマーシャル・ラーナー条件などを計算できます。
+""")
 
 
 # 計算する項目を選択
