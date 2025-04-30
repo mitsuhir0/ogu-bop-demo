@@ -119,8 +119,8 @@ with tab1:
             first_account = transaction_info["first_account"]
             second_account = transaction_info["second_account"]
             
-            # 取引日付を追加
-            current_datetime = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
+            # 日本標準時で取引日付を追加
+            current_datetime = (datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=9)).strftime("%Y-%m-%d %H:%M")
             
             # 数値型のフィールドにはfloatを使用し、空のフィールドにはnp.nanを使用
             record = {
@@ -211,7 +211,7 @@ with tab1:
         
         if st.button("全ての取引を削除"):
             st.session_state.records = []
-            st.experimental_rerun()
+            st.success("全ての取引が削除されました。ページをリロードしてください。")
     else:
         st.info("まだ取引が記録されていません。")
 
