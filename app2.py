@@ -2,13 +2,6 @@ import streamlit as st
 
 st.title("弾力性計算機（価格・交差・所得・マーシャル・ラーナー条件）")
 
-st.markdown("""
-機能一覧：
-- 価格弾力性
-- 交差価格弾力性
-- 所得弾力性
-- マーシャル・ラーナー条件の検証
-""")
 
 # 計算する項目を選択
 elasticity_type = st.selectbox(
@@ -27,11 +20,26 @@ if elasticity_type == "価格弾力性":
     if p1 == 0 or q1 == 0 or (p2 - p1) == 0:
         st.error("計算できません：Q1, P1 は 0 ではなく、価格の変化が必要です。")
     else:
-        ed = ((q2 - q1) / q1) / ((p2 - p1) / p1)
+        delta_q = q2 - q1
+        delta_p = p2 - p1
+        percentage_change_q = delta_q / q1
+        percentage_change_p = delta_p / p1
+        ed = abs(percentage_change_q / percentage_change_p)  # 絶対値を取ることでプラス表記
+
+        # 途中式と結果を表示
+        st.markdown(f"""
+        **途中計算**:
+        - 数量の変化: ΔQ = Q2 - Q1 = {q2} - {q1} = {delta_q}
+        - 価格の変化: ΔP = P2 - P1 = {p2} - {p1} = {delta_p}
+        - 数量の変化率: ΔQ / Q1 = {delta_q} / {q1} = {percentage_change_q:.2f}
+        - 価格の変化率: ΔP / P1 = {delta_p} / {p1} = {percentage_change_p:.2f}
+        - 価格弾力性: E_d = |(ΔQ / Q1) / (ΔP / P1)| = |{percentage_change_q:.2f} / {percentage_change_p:.2f}| = {ed:.2f}
+        """)
+
         st.subheader(f"価格弾力性: {ed:.2f}")
-        if abs(ed) > 1:
+        if ed > 1:
             st.success("弾力的")
-        elif abs(ed) == 1:
+        elif ed == 1:
             st.info("単位弾力的")
         else:
             st.warning("非弾力的")
@@ -51,7 +59,22 @@ elif elasticity_type == "交差価格弾力性":
     if p1_other == 0 or q1 == 0 or (p2_other - p1_other) == 0:
         st.error("計算できません：Q1, P1′ は 0 ではなく、価格の変化が必要です。")
     else:
-        ec = ((q2 - q1) / q1) / ((p2_other - p1_other) / p1_other)
+        delta_q = q2 - q1
+        delta_p_other = p2_other - p1_other
+        percentage_change_q = delta_q / q1
+        percentage_change_p_other = delta_p_other / p1_other
+        ec = percentage_change_q / percentage_change_p_other
+
+        # 途中式と結果を表示
+        st.markdown(f"""
+        **途中計算**:
+        - 数量の変化: ΔQ = Q2 - Q1 = {q2} - {q1} = {delta_q}
+        - 他商品の価格の変化: ΔP' = P2' - P1' = {p2_other} - {p1_other} = {delta_p_other}
+        - 数量の変化率: ΔQ / Q1 = {delta_q} / {q1} = {percentage_change_q:.2f}
+        - 他商品の価格変化率: ΔP' / P1' = {delta_p_other} / {p1_other} = {percentage_change_p_other:.2f}
+        - 交差価格弾力性: E_c = (ΔQ / Q1) / (ΔP' / P1') = {percentage_change_q:.2f} / {percentage_change_p_other:.2f} = {ec:.2f}
+        """)
+
         st.subheader(f"交差価格弾力性: {ec:.2f}")
         st.markdown("""
         **交差価格弾力性の解説**:
@@ -69,7 +92,22 @@ elif elasticity_type == "所得弾力性":
     if y1 == 0 or q1 == 0 or (y2 - y1) == 0:
         st.error("計算できません：Q1, Y1 は 0 ではなく、所得の変化が必要です。")
     else:
-        ey = ((q2 - q1) / q1) / ((y2 - y1) / y1)
+        delta_q = q2 - q1
+        delta_y = y2 - y1
+        percentage_change_q = delta_q / q1
+        percentage_change_y = delta_y / y1
+        ey = percentage_change_q / percentage_change_y
+
+        # 途中式と結果を表示
+        st.markdown(f"""
+        **途中計算**:
+        - 数量の変化: ΔQ = Q2 - Q1 = {q2} - {q1} = {delta_q}
+        - 所得の変化: ΔY = Y2 - Y1 = {y2} - {y1} = {delta_y}
+        - 数量の変化率: ΔQ / Q1 = {delta_q} / {q1} = {percentage_change_q:.2f}
+        - 所得の変化率: ΔY / Y1 = {delta_y} / {y1} = {percentage_change_y:.2f}
+        - 所得弾力性: E_y = (ΔQ / Q1) / (ΔY / Y1) = {percentage_change_q:.2f} / {percentage_change_y:.2f} = {ey:.2f}
+        """)
+
         st.subheader(f"所得弾力性: {ey:.2f}")
         st.markdown("""
         **所得弾力性の解説**:
@@ -80,18 +118,32 @@ elif elasticity_type == "所得弾力性":
 elif elasticity_type == "マーシャル・ラーナー条件":
     st.subheader("マーシャル・ラーナー条件")
     st.latex(r"|E_x| + |E_m| > 1")
-    st.markdown("ここで、$E_x$：輸出の価格弾力性、$E_m$：輸入の価格弾力性")
-    ex = st.number_input("輸出の価格弾力性（Ex）", value=-1.2)
-    em = st.number_input("輸入の価格弾力性（Em）", value=-0.5)
-    total_elasticity = abs(ex) + abs(em)
-    st.subheader(f"|Ex| + |Em| = {total_elasticity:.2f}")
-    if total_elasticity > 1:
-        st.success("マーシャル・ラーナー条件は満たされています（経常収支は改善可能）")
-    else:
-        st.error("マーシャル・ラーナー条件は満たされていません（経常収支の改善は難しい可能性）")
     st.markdown("""
-    **マーシャル・ラーナー条件の解説**:
-    - この条件が満たされる場合、為替レートの変化が経常収支を改善する可能性があります。
+    **マーシャル・ラーナー条件の説明**:
+    - $E_x$（為替レート変化に対する輸出量の弾力性）と $E_m$（為替レート変化に対する輸入量の弾力性）は通常正の値を取ります。
+    - この条件が満たされる場合、為替レートの変化（例えば、自国通貨の減価）が経常収支を改善する可能性があります。
+    """)
+
+    # ユーザー入力
+    ex = st.number_input("為替レート変化に対する輸出量の弾力性（Ex, 通常正の値）", value=1.2)
+    em = st.number_input("為替レート変化に対する輸入量の弾力性（Em, 通常正の値）", value=0.8)
+
+    # 弾力性の合計を計算
+    total_elasticity = ex + em
+
+    # 結果表示
+    st.subheader(f"計算結果: Ex + Em = {ex:.2f} + {em:.2f} = {total_elasticity:.2f}")
+    if total_elasticity > 1:
+        st.success("マーシャル・ラーナー条件は満たされています（経常収支は改善可能です）")
+    else:
+        st.error("マーシャル・ラーナー条件は満たされていません（経常収支の改善は難しい可能性があります）")
+
+    # 解説
+    st.markdown("""
+    **解説**:
+    - **為替レート変化に対する輸出量の弾力性（Ex）**: 為替レートが変化した際に輸出量がどれだけ変化するかを示します。通常、正の値を取ります。
+    - **為替レート変化に対する輸入量の弾力性（Em）**: 為替レートが変化した際に輸入量がどれだけ変化するかを示します。通常、正の値を取ります。
+    - **条件の意味**: 自国通貨が減価した場合、輸出が増加し、輸入が減少することで経常収支が改善する可能性があります。ただし、これが成立するためには、Ex + Em > 1 である必要があります。
     """)
 
 
