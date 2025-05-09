@@ -1,19 +1,39 @@
 import streamlit as st
 
 # 為替レート計算機
-st.title("為替レート計算機")
+st.title("為替レート計算機（比較表示）")
 
-# 初期為替レートを設定
-exchange_rate = st.number_input("為替レート (1ドルあたりの円)", value=140, step=5)
+# レイアウトを2カラムに分割
+col1, col2 = st.columns(2)
 
-# Highlight the results using Streamlit's `st.markdown` with custom styling.
+with col1:
+    st.header("為替レート計算機 1")
+    st.markdown("<style>.slider-label { display: flex; justify-content: space-between; }</style>", unsafe_allow_html=True)
+    st.markdown("<div class='slider-label'><span>円高</span><span>円安</span></div>", unsafe_allow_html=True)
+    exchange_rate_1 = st.slider("為替レート (1ドルあたりの円)", min_value=50, max_value=200, value=140, step=1, key="slider1")
 
-st.subheader("ドルから円への変換")
-dollar_input = st.number_input("ドルを入力", value=100.0, min_value=0.0, step=1.0, format="%.0f")
-yen_output = dollar_input * exchange_rate
-st.markdown(f"{dollar_input}ドルは約 <span style='color: green; font-weight: bold;'>{yen_output:.2f}</span> 円です。（1ドル{exchange_rate}円のとき）", unsafe_allow_html=True)
+    st.subheader("ドルから円への変換")
+    dollar_input_1 = st.number_input("ドルを入力", value=100.0, min_value=0.0, step=1.0, format="%.0f", key="dollar1")
+    yen_output_1 = dollar_input_1 * exchange_rate_1
+    st.write(f"{dollar_input_1:,.0f}ドルは約 {yen_output_1:,.0f} 円です。（1ドル{exchange_rate_1:,.0f}円のとき）")
 
-st.subheader("円からドルへの変換")
-yen_input = st.number_input("円を入力",value=10000.0, min_value=0.0, step=100.0, format="%.0f")
-dollar_output = yen_input / exchange_rate
-st.markdown(f"{yen_input}円は約 <span style='color: blue; font-weight: bold;'>{dollar_output:.2f}</span> ドルです。（1ドル{exchange_rate}円のとき）", unsafe_allow_html=True)
+    st.subheader("円からドルへの変換")
+    yen_input_1 = st.number_input("円を入力", value=10000.0, min_value=0.0, step=100.0, format="%.0f", key="yen1")
+    dollar_output_1 = yen_input_1 / exchange_rate_1
+    st.write(f"{yen_input_1:,.0f}円は約 {dollar_output_1:,.0f} ドルです。（1ドル{exchange_rate_1:,.0f}円のとき）")
+
+with col2:
+    st.header("為替レート計算機 2")
+    st.markdown("<style>.slider-label { display: flex; justify-content: space-between; }</style>", unsafe_allow_html=True)
+    st.markdown("<div class='slider-label'><span>円高</span><span>円安</span></div>", unsafe_allow_html=True)
+    exchange_rate_2 = st.slider("為替レート (1ドルあたりの円)", min_value=50, max_value=200, value=140, step=1, key="slider2")
+
+    st.subheader("ドルから円への変換")
+    dollar_input_2 = st.number_input("ドルを入力", value=100.0, min_value=0.0, step=1.0, format="%.0f", key="dollar2")
+    yen_output_2 = dollar_input_2 * exchange_rate_2
+    st.write(f"{dollar_input_2:,.0f}ドルは約 {yen_output_2:,.0f} 円です。（1ドル{exchange_rate_2:,.0f}円のとき）")
+
+    st.subheader("円からドルへの変換")
+    yen_input_2 = st.number_input("円を入力", value=10000.0, min_value=0.0, step=100.0, format="%.0f", key="yen2")
+    dollar_output_2 = yen_input_2 / exchange_rate_2
+    st.write(f"{yen_input_2:,.0f}円は約 {dollar_output_2:,.0f} ドルです。（1ドル{exchange_rate_2:,.0f}円のとき）")
